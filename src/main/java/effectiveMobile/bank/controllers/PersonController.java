@@ -6,6 +6,7 @@ import effectiveMobile.bank.util.PersonRegDtoValidator;
 import effectiveMobile.bank.util.dto.PersonListItemDto;
 import effectiveMobile.bank.util.dto.PersonRegDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,11 @@ public class PersonController {
     private PersonService personService;
     private PersonRegDtoValidator personRegDtoValidator;
 
+    @GetMapping("/find")        // поиск человека по дате рождения (больше чем передана)
+    public List<PersonListItemDto> findWithBirthAfter(@RequestParam String birthday) {
+        return personService.findWithBirthAfter(birthday);
+    }
+
     @PostMapping("/reg")        // Регистрация новых пользователей
     public void register(@Valid @RequestBody PersonRegDto regDto,
                             BindingResult bindingResult) {
@@ -32,11 +38,22 @@ public class PersonController {
         personService.registerPerson(regDto);
     }
 
-    @PutMapping("/update/{id}")     // обновление телефона или email пользователя
-    public void updatePerson(@PathVariable int id,
-                             @RequestParam("phoneNumber") String phoneNumber,
-                             @RequestParam("email") String email) {
+    // todo норм ли контроллер или стоит сделать получше
+    @PutMapping("/update/{id}/phone")       // обновление телефона человека
+    public void updatePhoneNumber(@PathVariable int id,
+                                  @RequestParam String phoneNumber) {
+        personService.updatePhoneNumber(id, phoneNumber);
+    }
 
+    @PutMapping("/delete/{id}/phone")       // удаление телефона человека
+    public void deletePhoneNumber(@PathVariable int id) {
+        personService.deletePhoneNumber(id);
+    }
+
+    @PutMapping("/update/{id}/email")       // обновление email у человека
+    public void updateEmail(@PathVariable int id,
+                            @RequestParam String email) {
+        personService.updateEmail(id, email);
     }
 
     @GetMapping("/list")

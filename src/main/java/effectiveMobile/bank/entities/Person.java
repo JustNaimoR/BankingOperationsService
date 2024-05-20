@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /*
@@ -40,7 +41,7 @@ public class Person {
     @Email(message = "incorrect email")
     private String email;
 
-    private Date birthday;
+    private LocalDateTime birthday;
 
     @Column(name = "phone_number")
     @Size(min = 11, max = 11, message = "length of the phone number is incorrect")

@@ -24,12 +24,15 @@ public class ExceptionsHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleValidationException(ValidationException ex) {
         Map<String, String> map = new HashMap<>();
+        map.put("message", ex.getMessage());
 
-        ex.getErrors().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            map.put(fieldName, errorMessage);
-        });
+        if (ex.getErrors() != null) {
+            ex.getErrors().getAllErrors().forEach(error -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                map.put(fieldName, errorMessage);
+            });
+        }
 
         return new ExceptionDto(map);
     }

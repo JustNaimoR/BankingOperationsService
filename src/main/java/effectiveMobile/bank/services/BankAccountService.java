@@ -19,4 +19,9 @@ public class BankAccountService {
 
         bankAccountRepository.save(bankAccount);
     }
+
+    //todo проверка на ненаход?
+    public BankAccount findById(int id) {
+        return bankAccountRepository.findById(id).orElseThrow();
+    }
 }
