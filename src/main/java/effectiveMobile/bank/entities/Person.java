@@ -1,7 +1,9 @@
 package effectiveMobile.bank.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Date;
@@ -34,9 +36,13 @@ public class Person {
     private String password;
 
     private String fullname;
+
+    @Email(message = "incorrect email")
     private String email;
+
     private Date birthday;
 
     @Column(name = "phone_number")
+    @Size(min = 11, max = 11, message = "length of the phone number is incorrect")
     private String phoneNumber;
 }

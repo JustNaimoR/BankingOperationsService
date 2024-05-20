@@ -1,6 +1,7 @@
 package effectiveMobile.bank.util;
 
-import effectiveMobile.bank.exceptions.SignUpException;
+import effectiveMobile.bank.exceptions.PersonNotFoundException;
+import effectiveMobile.bank.exceptions.ValidationException;
 import effectiveMobile.bank.services.PersonService;
 import effectiveMobile.bank.util.dto.PersonRegDto;
 import lombok.AllArgsConstructor;
@@ -25,20 +26,20 @@ public class PersonRegDtoValidator implements Validator {
         try {   //todo нормальная ли валидация с try-catch
             personService.findByLogin(dto.getLogin());
             errors.rejectValue("login", "", "This login is already taken");
-        } catch (Exception e) {}
+        } catch (PersonNotFoundException ignored) {}
 
         try {
             personService.findByEmail(dto.getEmail());
             errors.rejectValue("email", "", "This email address is already in use");
-        } catch (Exception e) {}
+        } catch (PersonNotFoundException ignored) {}
 
         try {
             personService.findByPhoneNumber(dto.getPhoneNumber());
             errors.rejectValue("phoneNumber", "", "This phone number is already in use");
-        } catch (Exception e) {}
+        } catch (PersonNotFoundException ignored) {}
 
         if (errors.hasErrors()) {
-            throw new SignUpException("incorrect values", errors);
+            throw new ValidationException("incorrect values", errors);
         }
     }
 }

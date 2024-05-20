@@ -1,7 +1,9 @@
 package effectiveMobile.bank.services;
 
 import effectiveMobile.bank.entities.Person;
+import effectiveMobile.bank.exceptions.PersonNotFoundException;
 import effectiveMobile.bank.repositories.PersonRepository;
+import effectiveMobile.bank.util.dto.PersonListItemDto;
 import effectiveMobile.bank.util.dto.PersonRegDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -17,24 +19,32 @@ public class PersonService {
     private PersonRepository personRepository;
     private BankAccountService bankAccountService;
 
-    public List<Person> getPeople() {
-        return personRepository.findAll();
+    public List<PersonListItemDto> getPeople() {
+        return personRepository.findAll().stream().map(person ->
+                PersonListItemDto.builder()
+                        .login(person.getLogin())
+                        .fullname(person.getFullname())
+                        .email(person.getEmail())
+                        .birthday(person.getBirthday())
+                        .phoneNumber(person.getPhoneNumber())
+                        .amount(person.getBankAccount().getAmount())
+                        .build()
+        ).toList();
     }
 
-    // todo заменить исключение на своё - ненаход человека
     public Person findByEmail(String email) {
         Optional<Person> optionalPerson = personRepository.findByEmail(email);
-        return optionalPerson.orElseThrow();
+        return optionalPerson.orElseThrow(PersonNotFoundException::new);
     }
 
     public Person findByLogin(String login) {
         Optional<Person> optionalPerson = personRepository.findByLogin(login);
-        return optionalPerson.orElseThrow();
+        return optionalPerson.orElseThrow(PersonNotFoundException::new);
     }
 
     public Person findByPhoneNumber(String phoneNumber) {
         Optional<Person> optionalPerson = personRepository.findByPhoneNumber(phoneNumber);
-        return optionalPerson.orElseThrow();
+        return optionalPerson.orElseThrow(PersonNotFoundException::new);
     }
 
     @Transactional
