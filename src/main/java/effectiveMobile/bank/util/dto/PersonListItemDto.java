@@ -17,9 +17,9 @@ public class PersonListItemDto {
     private String email;
     private LocalDateTime birthday;
     private String phoneNumber;
-    private int amount;
+    private double amount;
 
-    public static PersonListItemDto toDto(Person person, int amount) {
+    public static PersonListItemDto toDto(Person person, double amount) {
         return PersonListItemDto.builder()
                 .login(person.getLogin())
                 .fullname(person.getFullname())

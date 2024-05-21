@@ -22,5 +22,8 @@ public class BankAccount {
     private Person person;
 
     @Min(value = 0, message = "initial amount can't be negative")
-    private int amount;
+    private double amount;
+
+    @Column(name = "initial_amount")
+    private double initialAmount;
 }

@@ -1,5 +1,6 @@
 package effectiveMobile.bank.services;
 
+import effectiveMobile.bank.entities.BankAccount;
 import effectiveMobile.bank.entities.Person;
 import effectiveMobile.bank.exceptions.PersonNotFoundException;
 import effectiveMobile.bank.exceptions.ValidationException;
@@ -10,20 +11,25 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
+//todo что с транзакциями? может поставить аннотацию над классом?
 
 @Service
 @AllArgsConstructor
 public class PersonService {
     private PersonRepository personRepository;
     private BankAccountService bankAccountService;
+    private PasswordEncoder passwordEncoder;
 
     public List<PersonListItemDto> getPeople() {
         return personRepository.findAll().stream().map(person ->
@@ -41,10 +47,10 @@ public class PersonService {
     @Transactional
     public List<PersonListItemDto> findWithBirthAfter(String birthday) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate date = LocalDate.parse(birthday, formatter);
+        LocalDateTime dateTime = LocalDate.parse(birthday, formatter).atStartOfDay();
 
-        return personRepository.findWithBirthAfter(date).stream().map(person ->
-                PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount()))
+        return personRepository.findWithBirthAfter(dateTime).stream()
+                .map(person -> PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount()))
                 .toList();
     }
 
@@ -96,12 +102,20 @@ public class PersonService {
         return findByField(phoneNumber, personRepository::findByPhoneNumber);
     }
 
+    public PersonListItemDto toListItemDto(Person person) {
+        return PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount());
+    }
+
+    public List<PersonListItemDto> findWithLikeFullname(String fullname) {
+        return personRepository.findWithLikeFullname(fullname).stream().map(this::toListItemDto).toList();
+    }
+
     @Transactional
     public void registerPerson(PersonRegDto regDto) {
         Person person = PersonRegDto.toPerson(regDto);
         bankAccountService.createAccount(person, regDto.getAmount());
+        person.setPassword(passwordEncoder.encode(person.getPassword()));
 
         personRepository.save(person);
     }
-
 }
