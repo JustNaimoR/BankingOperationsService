@@ -41,4 +41,15 @@ public class PersonRegDto {
                 .withPhoneNumber(dto.getPhoneNumber())
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "[ " +
+                "login=" + login +
+                ", password=" + password +
+                ", amount=" + amount +
+                ", phoneNumber=" + phoneNumber +
+                ", email=" + email +
+                "]";
+    }
 }

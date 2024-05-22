@@ -1,5 +1,6 @@
 package effectiveMobile.bank.util;
 
+import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.exceptions.PersonNotFoundException;
 import effectiveMobile.bank.exceptions.ValidationException;
 import effectiveMobile.bank.services.PersonService;
@@ -23,7 +24,7 @@ public class PersonRegDtoValidator implements Validator {
     public void validate(Object target, Errors errors) {
         PersonRegDto dto = (PersonRegDto) target;
 
-        try {   //todo нормальная ли валидация с try-catch
+        try {
             personService.findByLogin(dto.getLogin());
             errors.rejectValue("login", "", "This login is already taken");
         } catch (PersonNotFoundException ignored) {}
@@ -41,5 +42,7 @@ public class PersonRegDtoValidator implements Validator {
         if (errors.hasErrors()) {
             throw new ValidationException("incorrect values", errors);
         }
+
+        BankingOperationsServiceApplication.logger.info("Person's values are valid!");
     }
 }

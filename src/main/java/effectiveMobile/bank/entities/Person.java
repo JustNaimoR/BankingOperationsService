@@ -46,4 +46,16 @@ public class Person {
     @Column(name = "phone_number")
     @Size(min = 11, max = 11, message = "length of the phone number is incorrect")
     private String phoneNumber;
+
+    @Override
+    public String toString() {
+        return "[ " +
+                "id=" + id +
+                ", login=" + login +
+                ", fullname=" + fullname +
+                ", email=" + email +
+                ", birthday=" + birthday +
+                ", phoneNumber=" + phoneNumber +
+                "]";
+    }
 }

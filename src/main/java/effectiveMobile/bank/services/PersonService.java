@@ -1,5 +1,6 @@
 package effectiveMobile.bank.services;
 
+import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.entities.BankAccount;
 import effectiveMobile.bank.entities.Person;
 import effectiveMobile.bank.exceptions.PersonNotFoundException;
@@ -8,12 +9,9 @@ import effectiveMobile.bank.repositories.PersonRepository;
 import effectiveMobile.bank.util.dto.PersonListItemDto;
 import effectiveMobile.bank.util.dto.PersonRegDto;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,10 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-//todo что с транзакциями? может поставить аннотацию над классом?
-
 @Service
 @AllArgsConstructor
+@Transactional
 public class PersonService {
     private PersonRepository personRepository;
     private BankAccountService bankAccountService;
@@ -44,18 +41,21 @@ public class PersonService {
         ).toList();
     }
 
-    @Transactional
     public List<PersonListItemDto> findWithBirthAfter(String birthday) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDateTime dateTime = LocalDate.parse(birthday, formatter).atStartOfDay();
 
-        return personRepository.findWithBirthAfter(dateTime).stream()
+        List<PersonListItemDto> list = personRepository.findWithBirthAfter(dateTime).stream()
                 .map(person -> PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount()))
                 .toList();
+
+        BankingOperationsServiceApplication.logger.info("Found {} people with birthdaye after {}", list.size(), birthday);
+
+        return list;
     }
 
-    @Transactional
     public void updatePhoneNumber(int id, String phoneNumber) {
+        //todo сделать валидацию по другому? как убрать все эти if
         if (phoneNumber != null && personRepository.findByPhoneNumber(phoneNumber).isPresent()) {
             throw new ValidationException("Phone number already exists");
         }
@@ -65,14 +65,14 @@ public class PersonService {
 
         Person person = personRepository.findById(id).orElseThrow(PersonNotFoundException::new);
         person.setPhoneNumber(phoneNumber);
+
+        BankingOperationsServiceApplication.logger.info("Phone number updated to {} for person with id= {}", phoneNumber, id);
     }
 
-    @Transactional
     public void deletePhoneNumber(int id) {
         updatePhoneNumber(id, null);
     }
 
-    @Transactional
     public void updateEmail(int id, String email) {
         if (personRepository.findByEmail(email).isPresent()) {
             throw new ValidationException("email already exists");
@@ -83,11 +83,8 @@ public class PersonService {
 
         Person person = personRepository.findById(id).orElseThrow(PersonNotFoundException::new);
         person.setEmail(email);
-    }
 
-    private <T> Person findByField(T field, Function<T, Optional<Person>> repFunc) {
-        Optional<Person> optionalPerson = repFunc.apply(field);
-        return optionalPerson.orElseThrow(PersonNotFoundException::new);
+        BankingOperationsServiceApplication.logger.info("Email updated to {} for person with id= {}", email, id);
     }
 
     public Person findByEmail(String email) {
@@ -110,12 +107,21 @@ public class PersonService {
         return personRepository.findWithLikeFullname(fullname).stream().map(this::toListItemDto).toList();
     }
 
-    @Transactional
     public void registerPerson(PersonRegDto regDto) {
+        BankingOperationsServiceApplication.logger.info("the person is registering...");
+
         Person person = PersonRegDto.toPerson(regDto);
         bankAccountService.createAccount(person, regDto.getAmount());
         person.setPassword(passwordEncoder.encode(person.getPassword()));
 
         personRepository.save(person);
+
+        BankingOperationsServiceApplication.logger.info("the person with {} units is saved! {}", regDto.getAmount(), person.toString());
+    }
+
+
+    private <T> Person findByField(T field, Function<T, Optional<Person>> repFunc) {
+        Optional<Person> optionalPerson = repFunc.apply(field);
+        return optionalPerson.orElseThrow(PersonNotFoundException::new);
     }
 }
