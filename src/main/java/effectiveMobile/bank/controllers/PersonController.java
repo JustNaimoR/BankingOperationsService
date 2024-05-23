@@ -21,10 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*
-todo
- - Выделить отдельно конечные ендпоинты для контроллера - swagger -> ?
- */
+//todo
+// - BigDecimal вместо double
+// - пересмотреть механику (на более 207% в отдельном потоке) и 207% от начального депозита (?)
 
 @RestController
 @RequestMapping("/user")
@@ -34,6 +33,28 @@ public class PersonController {
     private PersonRegDtoValidator personRegDtoValidator;
     private BankAccountService bankAccountService;
     private AuthService authService;
+
+
+
+    @PostMapping("/reg")                        // Регистрация новых пользователей
+    @ResponseStatus(HttpStatus.CREATED)
+    public JwtResponse register(@Valid @RequestBody PersonRegDto regDto,
+                                BindingResult bindingResult) {
+        BankingOperationsServiceApplication.logger.info("'/user/reg' request received to register a new person with values: {}", regDto.toString());
+
+        personRegDtoValidator.validate(regDto, bindingResult);
+        personService.registerPerson(regDto);
+
+        return authService.authenticateUser(new LoginRequest(regDto));
+    }
+
+    @GetMapping("/list")                    // получение списка всех пользователей
+    @ResponseStatus(HttpStatus.OK)
+    public List<PersonListItemDto> getPeople() {
+        return personService.getPeople();
+    }
+
+
 
     @GetMapping("/find/birth-after")        // поиск человека по дате рождения (больше чем передана)
     @ResponseStatus(HttpStatus.OK)
@@ -67,17 +88,7 @@ public class PersonController {
         return personService.toListItemDto(personService.findByEmail(email));
     }
 
-    @PostMapping("/reg")                        // Регистрация новых пользователей
-    @ResponseStatus(HttpStatus.CREATED)
-    public JwtResponse register(@Valid @RequestBody PersonRegDto regDto,
-                            BindingResult bindingResult) {
-        BankingOperationsServiceApplication.logger.info("'/user/reg' request received to register a new person with values: {}", regDto.toString());
 
-        personRegDtoValidator.validate(regDto, bindingResult);
-        personService.registerPerson(regDto);
-
-        return authService.authenticateUser(new LoginRequest(regDto));
-    }
 
     // todo норм ли контроллер или стоит сделать получше
     @PutMapping("/update/{id}/phone")           // обновление телефона человека (1 значение в теле запроса)
@@ -89,15 +100,6 @@ public class PersonController {
         personService.updatePhoneNumber(id, phoneNumber);
     }
 
-    @PutMapping("/delete/{id}/phone")           // удаление телефона человека
-    @ResponseStatus(HttpStatus.OK)
-    public void deletePhoneNumber(@PathVariable int id) {
-        BankingOperationsServiceApplication.logger.info("'/user/delete/{}/phone' request received to delete a phone number for a person with id {}",
-                id, id);
-
-        personService.deletePhoneNumber(id);
-    }
-
     @PutMapping("/update/{id}/email")           // обновление email у человека (в теле запроса 1 значение)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateEmail(@PathVariable int id, @RequestBody String email) {
@@ -107,9 +109,17 @@ public class PersonController {
         personService.updateEmail(id, email);
     }
 
-    //todo запросы на изменения в теле запроса  лучше
-    // - для денег double не стоит - bigDecimal?
-    // - для получения одного значения из тела @RequestBody() - посмотреть
+    @PutMapping("/delete/{id}/phone")           // удаление телефона человека
+    @ResponseStatus(HttpStatus.OK)
+    public void deletePhoneNumber(@PathVariable int id) {
+        BankingOperationsServiceApplication.logger.info("'/user/delete/{}/phone' request received to delete a phone number for a person with id {}",
+                id, id);
+
+        personService.deletePhoneNumber(id);
+    }
+
+
+
     @PutMapping("/{from}/transfer")
     @ResponseStatus(HttpStatus.OK)
     public void transfer(@PathVariable int from, @RequestBody UnitTransferDto transferDto) {
@@ -117,11 +127,5 @@ public class PersonController {
                 from, transferDto.getAmount(), transferDto.getToId());
 
         bankAccountService.transferMoney(from, transferDto);
-    }
-
-    @GetMapping("/list")                    // получение списка всех пользователей
-    @ResponseStatus(HttpStatus.OK)
-    public List<PersonListItemDto> getPeople() {
-        return personService.getPeople();
     }
 }

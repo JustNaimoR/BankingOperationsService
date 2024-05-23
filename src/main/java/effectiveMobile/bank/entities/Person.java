@@ -7,12 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-
-/*
-todo
- - валидация полей
- */
 
 @Builder(setterPrefix = "with")
 @AllArgsConstructor
@@ -27,7 +21,7 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne(mappedBy = "person")
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     private BankAccount bankAccount;
 
     @NotEmpty(message = "login can't be empty!")

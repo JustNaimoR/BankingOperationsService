@@ -1,5 +1,6 @@
 package effectiveMobile.bank.security;
 
+import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,19 +31,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NotNull HttpServletResponse response,
             @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
+        BankingOperationsServiceApplication.logger.info("checking authentication token...");
+
         Optional<String> opt = getTokenFromRequest(request);
 
         //todo все ли верно для проверки пришедшего токена - access и refresh?
-        if (opt.isPresent() && jwtService.isTokenValid(opt.get())) {
+        if (opt.isPresent() && jwtService.isAuthTokenValid(opt.get())) {
+            BankingOperationsServiceApplication.logger.info("Authentication token is valid. authorization...");
+
             String jwtToken = opt.get();
 
-            String username = jwtService.extractUsername(jwtToken);
+            String username = jwtService.extractAuthUsername(jwtToken);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+        } else {
+            BankingOperationsServiceApplication.logger.warn("authorization token is invalid or absent");
         }
 
         filterChain.doFilter(request, response);

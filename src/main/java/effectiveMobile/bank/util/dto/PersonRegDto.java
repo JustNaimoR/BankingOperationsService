@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -25,7 +27,7 @@ public class PersonRegDto {
     private String password;
 
     @Min(value = 0, message = "initial amount can't be negative")
-    private double amount;
+    private BigDecimal amount;
 
     @Size(min = 11, max = 11, message = "length of the phone number is incorrect")
     private String phoneNumber;

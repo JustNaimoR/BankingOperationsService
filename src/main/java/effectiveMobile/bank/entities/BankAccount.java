@@ -3,6 +3,9 @@ package effectiveMobile.bank.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.hibernate.annotations.Check;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -22,8 +25,9 @@ public class BankAccount {
     private Person person;
 
     @Min(value = 0, message = "initial amount can't be negative")
-    private double amount;
+
+    private BigDecimal amount;
 
     @Column(name = "initial_amount")
-    private double initialAmount;
+    private BigDecimal initialAmount;
 }

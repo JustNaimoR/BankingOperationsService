@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @ConditionalOnProperty(name = "scheduler.enabled", matchIfMissing = true)
 public class BankingOperationsServiceApplication {
-	//todo логирование пришедших запросов - выводить как запрос пришел
 	public static final Logger logger = LoggerFactory.getLogger(BankingOperationsServiceApplication.class);
 
 	public static void main(String[] args) {

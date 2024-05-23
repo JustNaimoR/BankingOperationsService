@@ -37,13 +37,8 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/reg", "/user/list", "/refresh-access-token", "/login").permitAll()
+                .requestMatchers( "/user/list", "/user/reg", "/refresh-access-token", "/login").permitAll()
                 .anyRequest().authenticated());
-
-//        http.authorizeHttpRequests(auth -> auth
-////                .requestMatchers(HttpMethod.GET, "/user/list").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/user/reg").permitAll()
-//                .anyRequest().authenticated());
 
         return http.build();
     }

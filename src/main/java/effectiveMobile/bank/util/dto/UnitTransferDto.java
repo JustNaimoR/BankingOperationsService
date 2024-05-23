@@ -6,9 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.Check;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
+@Builder
 @Getter
 public class UnitTransferDto {
     private int toId;
-    private double amount;
+    private BigDecimal amount;
 }

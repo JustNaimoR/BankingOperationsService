@@ -23,7 +23,6 @@ public class AuthService {
     private JwtService jwtService;
     private UserDetailsServiceImpl userDetailsService;
 
-    //todo исключение при неверном пароле - какое и настроить обработку
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         BankingOperationsServiceApplication.logger.info("Authenticating user...");
 
@@ -41,18 +40,34 @@ public class AuthService {
     }
 
     public JwtResponse refreshTokens(RefreshJwtRequest jwtRequest, boolean newRefresh) {
+        BankingOperationsServiceApplication.logger.info("Refreshing tokens...");
+
         String refreshToken = jwtRequest.getRefreshToken();
 
-        if (jwtService.isTokenValid(refreshToken)) {
-            String username = jwtService.extractUsername(refreshToken);
+        if (jwtService.isRefreshTokenValid(refreshToken)) {
+            String username = jwtService.extractRefreshUsername(refreshToken);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             String new_accessToken = jwtService.generateAccessToken(userDetails);
             String new_refreshToken = jwtService.generateRefreshToken(userDetails);
 
+            if (newRefresh) {
+                BankingOperationsServiceApplication.logger.info("new tokens: access - {} refresh - {}",
+                        new_accessToken, new_refreshToken);
+            } else {
+                BankingOperationsServiceApplication.logger.info("new access token - {}",
+                        new_accessToken);
+            }
+
             return new JwtResponse(new_accessToken, newRefresh? new_refreshToken: null);
         } else {
+            BankingOperationsServiceApplication.logger.warn("Refresh-token is invalid");
+
             return new JwtResponse(null, null);
         }
+    }
+
+    public Authentication getCurAuthenticatedUser() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }

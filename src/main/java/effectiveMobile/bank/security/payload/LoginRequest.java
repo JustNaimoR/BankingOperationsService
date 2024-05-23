@@ -23,4 +23,9 @@ public class LoginRequest {
     private String login;
     @NotBlank
     private String password;
+
+    @Override
+    public String toString() {
+        return "LoginRequest [login=" + login + ", password=" + password + "]";
+    }
 }

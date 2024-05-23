@@ -25,26 +25,29 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     /**
-     * SECRET_KEY - подпись для jwt refresh и access токенов
      * ACCESS_EXPIRATION - время действия access jwt токена - 1 минута
      * REFRESH_EXPIRATION - время действия refresh jwt токена - 1 день
      */
-    @Value("${bankingOperationsService.jwt.SECRET_KEY}")
-    private String SECRET_KEY;
+    @Value("${bankingOperationsService.jwt.SECRET_ACCESS_KEY}")
+    private String SECRET_ACCESS_KEY;
+    @Value("${bankingOperationsService.jwt.SECRET_REFRESH_KEY}")
+    private String SECRET_REFRESH_KEY;
     @Value("${bankingOperationsService.jwt.ACCESS_EXPIRATION_MS}")              // 1 minute
     private int ACCESS_EXPIRATION;
     @Value("${bankingOperationsService.jwt.REFRESH_EXPIRATION_MS}")             // 1 day
     private long REFRESH_EXPIRATION;
 
+
+
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails, ACCESS_EXPIRATION);
+        return generateToken(new HashMap<>(), userDetails, SECRET_ACCESS_KEY, ACCESS_EXPIRATION);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(Map.of("dummy", "I_AM_A_TEAPOT"), userDetails, REFRESH_EXPIRATION);
+        return generateToken(Map.of("dummy", "I_AM_A_TEAPOT"), userDetails, SECRET_REFRESH_KEY, REFRESH_EXPIRATION);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, String SECRET, long expiration) {
         Date issuedDate = new Date(System.currentTimeMillis());
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
 
@@ -53,31 +56,25 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(issuedDate)
                 .setExpiration(expirationDate)
-                .signWith(getSigningKey(SECRET_KEY))
+                .signWith(getSigningKey(SECRET))
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+
+
+    // проверка на валидность access-токена
+    public boolean isAuthTokenValid(String token) {
+        return isTokenValid(token, SECRET_ACCESS_KEY);
     }
 
-    public Date extractExpirationDate(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    // проверка на валидность refresh-токена
+    public boolean isRefreshTokenValid(String token) {
+        return isTokenValid(token, SECRET_REFRESH_KEY);
     }
 
-    /**
-     * @param token          - jwt token
-     * @param claimsResolver - используемый метод для извлечения нужных полей из jwt
-     * @param <T>            - класс извлекаемого Claim
-     * @return необходимое поле T
-     */
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        return claimsResolver.apply(extractAllClaims(token));
-    }
-
-    public boolean isTokenValid(String token) {
+    private boolean isTokenValid(String token, String SECRET) {
         try {
-            extractAllClaims(token);
+            extractAllClaims(token, SECRET);
             return true;
         } catch (ExpiredJwtException ignored) {
             BankingOperationsServiceApplication.logger.warn("token is expired");
@@ -93,9 +90,31 @@ public class JwtService {
         return false;
     }
 
-    public boolean isTokenExpired(String token) {
-        return extractExpirationDate(token).before(new Date());
+    public boolean isAuthTokenExpired(String token) {
+        return extractExpirationDate(token, SECRET_ACCESS_KEY).before(new Date());
     }
+
+    public boolean isRefreshTokenExpired(String token) {
+        return extractExpirationDate(token, SECRET_REFRESH_KEY).before(new Date());
+    }
+
+
+
+    // получить username из access-токена
+    public String extractAuthUsername(String token) {
+        return extractClaim(token, Claims::getSubject, SECRET_ACCESS_KEY);
+    }
+
+    // получить username из refresh-токена
+    public String extractRefreshUsername(String token) {
+        return extractClaim(token, Claims::getSubject, SECRET_REFRESH_KEY);
+    }
+
+    private Date extractExpirationDate(String token, String SECRET) {
+        return extractClaim(token, Claims::getExpiration, SECRET);
+    }
+
+
 
     // Декодирование ключа для подписи в jwt
     private Key getSigningKey(String key) {
@@ -103,9 +122,19 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private Claims extractAllClaims(String token) {
+    /**
+     * @param token          - jwt token
+     * @param claimsResolver - используемый метод для извлечения нужных полей из jwt
+     * @param <T>            - класс извлекаемого Claim
+     * @return необходимое поле T
+     */
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver, String SECRET) {
+        return claimsResolver.apply(extractAllClaims(token, SECRET));
+    }
+
+    private Claims extractAllClaims(String token, String SECRET) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey(SECRET_KEY))
+                .setSigningKey(getSigningKey(SECRET))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

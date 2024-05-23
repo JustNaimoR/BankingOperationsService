@@ -108,6 +108,10 @@ public class PersonService {
         }
     }
 
+    public Person findById(int id) {
+        return findByField(id, personRepository::findById);
+    }
+
     public PersonListItemDto toListItemDto(Person person) {
         return PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount());
     }

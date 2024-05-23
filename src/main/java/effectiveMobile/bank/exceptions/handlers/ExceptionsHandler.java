@@ -2,10 +2,7 @@ package effectiveMobile.bank.exceptions.handlers;
 
 import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.entities.BankAccount;
-import effectiveMobile.bank.exceptions.BankAccountNotFoundException;
-import effectiveMobile.bank.exceptions.NotEnoughUnitsException;
-import effectiveMobile.bank.exceptions.PersonNotFoundException;
-import effectiveMobile.bank.exceptions.ValidationException;
+import effectiveMobile.bank.exceptions.*;
 import effectiveMobile.bank.exceptions.dto.ExceptionDto;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
@@ -75,8 +72,14 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(JwtException.class)
-    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleJwtCorrect(JwtException ex) {
+        return new ExceptionDto(ex);
+    }
+
+    @ExceptionHandler(IllegalActionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleIllegalActionException(IllegalActionException ex) {
         return new ExceptionDto(ex);
     }
 }
