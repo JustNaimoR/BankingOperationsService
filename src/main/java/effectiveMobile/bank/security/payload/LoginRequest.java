@@ -1,6 +1,7 @@
 package effectiveMobile.bank.security.payload;
 
 import effectiveMobile.bank.entities.Person;
+import effectiveMobile.bank.util.dto.PersonRegDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +14,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class LoginRequest {
 
-    public LoginRequest(Person person) {
-        this.login = person.getLogin();
-        this.password = person.getPassword();
+    public LoginRequest(PersonRegDto dto) {
+        this.login = dto.getLogin();
+        this.password = dto.getPassword();
     }
 
     @NotBlank

@@ -49,21 +49,20 @@ public class PersonService {
                 .map(person -> PersonListItemDto.toDto(person, bankAccountService.findById(person.getId()).getAmount()))
                 .toList();
 
-        BankingOperationsServiceApplication.logger.info("Found {} people with birthdaye after {}", list.size(), birthday);
+        BankingOperationsServiceApplication.logger.info("Found {} people with birthday after {}", list.size(), birthday);
 
         return list;
     }
 
     public void updatePhoneNumber(int id, String phoneNumber) {
         //todo сделать валидацию по другому? как убрать все эти if
-        if (phoneNumber != null && personRepository.findByPhoneNumber(phoneNumber).isPresent()) {
+        // если не нашли по id то выкидывать ошибку но с указанием какой id?
+        if (phoneNumber != null && personRepository.findByPhoneNumber(phoneNumber).isPresent())
             throw new ValidationException("Phone number already exists");
-        }
-        if (phoneNumber != null && phoneNumber.length() != 11) {
+        if (phoneNumber != null && phoneNumber.length() != 11)
             throw new ValidationException("Phone number should be 11 digits");
-        }
 
-        Person person = personRepository.findById(id).orElseThrow(PersonNotFoundException::new);
+        Person person = personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException(id));
         person.setPhoneNumber(phoneNumber);
 
         BankingOperationsServiceApplication.logger.info("Phone number updated to {} for person with id= {}", phoneNumber, id);
@@ -74,29 +73,39 @@ public class PersonService {
     }
 
     public void updateEmail(int id, String email) {
-        if (personRepository.findByEmail(email).isPresent()) {
+        if (personRepository.findByEmail(email).isPresent())
             throw new ValidationException("email already exists");
-        }
-        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"))   // проверка что email валиден
             throw new ValidationException("incorrect email");
-        }
 
-        Person person = personRepository.findById(id).orElseThrow(PersonNotFoundException::new);
+        Person person = personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException(id));
         person.setEmail(email);
 
         BankingOperationsServiceApplication.logger.info("Email updated to {} for person with id= {}", email, id);
     }
 
     public Person findByEmail(String email) {
-        return findByField(email, personRepository::findByEmail);
+        try {
+            return findByField(email, personRepository::findByEmail);
+        } catch (PersonNotFoundException ex) {
+            throw new PersonNotFoundException("Person with email '" + email + "' not found");
+        }
     }
 
     public Person findByLogin(String login) {
-        return findByField(login, personRepository::findByLogin);
+        try {
+            return findByField(login, personRepository::findByLogin);
+        } catch (PersonNotFoundException ex) {
+            throw new PersonNotFoundException("Person with login '" + login + "' not found");
+        }
     }
 
     public Person findByPhoneNumber(String phoneNumber) {
-        return findByField(phoneNumber, personRepository::findByPhoneNumber);
+        try {
+            return findByField(phoneNumber, personRepository::findByPhoneNumber);
+        } catch (PersonNotFoundException ex) {
+            throw new PersonNotFoundException("Person with phone number '" + phoneNumber + "' not found");
+        }
     }
 
     public PersonListItemDto toListItemDto(Person person) {
@@ -116,12 +125,12 @@ public class PersonService {
 
         personRepository.save(person);
 
-        BankingOperationsServiceApplication.logger.info("the person with {} units is saved! {}", regDto.getAmount(), person.toString());
+        BankingOperationsServiceApplication.logger.info("the person with {} units is saved! {}", regDto.getAmount(), person);
     }
 
 
-    private <T> Person findByField(T field, Function<T, Optional<Person>> repFunc) {
-        Optional<Person> optionalPerson = repFunc.apply(field);
+    private <T> Person findByField(T field, Function<T, Optional<Person>> reposFunc) {
+        Optional<Person> optionalPerson = reposFunc.apply(field);
         return optionalPerson.orElseThrow(PersonNotFoundException::new);
     }
 }

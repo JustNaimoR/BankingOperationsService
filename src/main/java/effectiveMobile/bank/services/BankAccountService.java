@@ -5,7 +5,9 @@ import effectiveMobile.bank.entities.BankAccount;
 import effectiveMobile.bank.entities.Person;
 import effectiveMobile.bank.exceptions.BankAccountNotFoundException;
 import effectiveMobile.bank.exceptions.NotEnoughUnitsException;
+import effectiveMobile.bank.exceptions.ValidationException;
 import effectiveMobile.bank.repositories.BankAccountRepository;
+import effectiveMobile.bank.util.dto.UnitTransferDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,25 +39,29 @@ public class BankAccountService {
 
     public BankAccount findById(int id) {
         Optional<BankAccount> optional = bankAccountRepository.findById(id);
-        return optional.orElseThrow(BankAccountNotFoundException::new);
+        return optional.orElseThrow(() -> new BankAccountNotFoundException(id));
     }
 
     public List<BankAccount> findAll() {
         return bankAccountRepository.findAll();
     }
 
-    public void transferMoney(int fromId, int toId, double amount) {
+    public void transferMoney(int fromId, UnitTransferDto transferDto) {
         //todo перевод аутентифицированным пользователем - проверка на совпадение id?
 
         BankAccount fromAccount = findById(fromId);
-        BankAccount toAccount = findById(toId);
+        BankAccount toAccount = findById(transferDto.getToId());
 
         BankingOperationsServiceApplication.logger.info("Transferring units... id={} have {} and id = {} have {}",
-                fromId, fromAccount.getAmount(), toId, toAccount.getAmount());
+                fromId, fromAccount.getAmount(), transferDto.getToId(), toAccount.getAmount());
 
-        if (fromAccount.getAmount() < amount) {
+        double amount = transferDto.getAmount();
+        int toId = toAccount.getId();
+
+        if (amount < 0)
+            throw new ValidationException("Amount cannot be negative");
+        if (fromAccount.getAmount() < amount)
             throw new NotEnoughUnitsException();
-        }
 
         fromAccount.setAmount(fromAccount.getAmount() - amount);
         toAccount.setAmount(toAccount.getAmount() + amount);

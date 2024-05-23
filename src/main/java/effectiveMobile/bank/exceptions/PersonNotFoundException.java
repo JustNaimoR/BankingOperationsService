@@ -7,4 +7,7 @@ public class PersonNotFoundException extends RuntimeException {
     public PersonNotFoundException() {
         super("person not found");
     }
+    public PersonNotFoundException(int id) {
+        super ("person with id=" + id + " not found");
+    }
 }

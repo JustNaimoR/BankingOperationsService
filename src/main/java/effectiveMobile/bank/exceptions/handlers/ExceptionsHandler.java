@@ -7,6 +7,7 @@ import effectiveMobile.bank.exceptions.NotEnoughUnitsException;
 import effectiveMobile.bank.exceptions.PersonNotFoundException;
 import effectiveMobile.bank.exceptions.ValidationException;
 import effectiveMobile.bank.exceptions.dto.ExceptionDto;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -25,7 +26,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(PersonNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDto handlePersonNotFoundException(PersonNotFoundException ex) {
-        BankingOperationsServiceApplication.logger.warn("An exception was caused due to the non-presence of a person");
+        BankingOperationsServiceApplication.logger.warn("An exception was caused due to the non-presence of a person. Message - {}", ex.getMessage());
 
         return new ExceptionDto(ex);
     }
@@ -60,7 +61,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(BankAccountNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleBankAccountNotFoundException(BankAccountNotFoundException ex) {
-        BankingOperationsServiceApplication.logger.warn("An exception was caused due to the non-presence of a bank account");
+        BankingOperationsServiceApplication.logger.warn("An exception was caused due to the non-presence of a bank account. Message - {}", ex.getMessage());
 
         return new ExceptionDto(ex);
     }
@@ -70,6 +71,12 @@ public class ExceptionsHandler {
     public ExceptionDto handleNotEnoughUnitsException(NotEnoughUnitsException ex) {
         BankingOperationsServiceApplication.logger.warn("A transferring was aborted due to account don't have enough units to transfer");
 
+        return new ExceptionDto(ex);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ExceptionDto handleJwtCorrect(JwtException ex) {
         return new ExceptionDto(ex);
     }
 }

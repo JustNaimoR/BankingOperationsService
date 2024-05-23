@@ -2,6 +2,7 @@ package effectiveMobile.bank.controllers;
 
 import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.entities.Person;
+import effectiveMobile.bank.security.payload.JwtResponse;
 import effectiveMobile.bank.security.payload.LoginRequest;
 import effectiveMobile.bank.security.service.AuthService;
 import effectiveMobile.bank.services.BankAccountService;
@@ -9,6 +10,7 @@ import effectiveMobile.bank.services.PersonService;
 import effectiveMobile.bank.util.PersonRegDtoValidator;
 import effectiveMobile.bank.util.dto.PersonListItemDto;
 import effectiveMobile.bank.util.dto.PersonRegDto;
+import effectiveMobile.bank.util.dto.UnitTransferDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -67,19 +69,20 @@ public class PersonController {
 
     @PostMapping("/reg")                        // Регистрация новых пользователей
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@Valid @RequestBody PersonRegDto regDto,
+    public JwtResponse register(@Valid @RequestBody PersonRegDto regDto,
                             BindingResult bindingResult) {
         BankingOperationsServiceApplication.logger.info("'/user/reg' request received to register a new person with values: {}", regDto.toString());
 
         personRegDtoValidator.validate(regDto, bindingResult);
         personService.registerPerson(regDto);
+
+        return authService.authenticateUser(new LoginRequest(regDto));
     }
 
     // todo норм ли контроллер или стоит сделать получше
-    @PutMapping("/update/{id}/phone")           // обновление телефона человека
+    @PutMapping("/update/{id}/phone")           // обновление телефона человека (1 значение в теле запроса)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updatePhoneNumber(@PathVariable int id,
-                                  @RequestParam String phoneNumber) {
+    public void updatePhoneNumber(@PathVariable int id, @RequestBody String phoneNumber) {
         BankingOperationsServiceApplication.logger.info("'/user/update/{}/phone' request received to update a phone number for a person with id {} to the new value {}",
                 id, id, phoneNumber);
 
@@ -95,10 +98,9 @@ public class PersonController {
         personService.deletePhoneNumber(id);
     }
 
-    @PutMapping("/update/{id}/email")           // обновление email у человека
+    @PutMapping("/update/{id}/email")           // обновление email у человека (в теле запроса 1 значение)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateEmail(@PathVariable int id,
-                            @RequestParam String email) {
+    public void updateEmail(@PathVariable int id, @RequestBody String email) {
         BankingOperationsServiceApplication.logger.info("'/user/update/{}/email' request received to update an email for a person with id {} to the new value {}",
                 id, id, email);
 
@@ -110,17 +112,12 @@ public class PersonController {
     // - для получения одного значения из тела @RequestBody() - посмотреть
     @PutMapping("/{from}/transfer")
     @ResponseStatus(HttpStatus.OK)
-    public void transfer(@PathVariable int from, @RequestParam int to, @RequestParam double amount) {
-        BankingOperationsServiceApplication.logger.info("'/user/{}/transfer' request received to transfer {} units to person with id {}", from, amount, to);
+    public void transfer(@PathVariable int from, @RequestBody UnitTransferDto transferDto) {
+        BankingOperationsServiceApplication.logger.info("'/user/{}/transfer' request received to transfer {} units to person with id {}",
+                from, transferDto.getAmount(), transferDto.getToId());
 
-        bankAccountService.transferMoney(from, to, amount);
+        bankAccountService.transferMoney(from, transferDto);
     }
-
-//    @PostMapping("/login")
-//    @ResponseStatus(HttpStatus.OK)              // вход в систему под логином
-//    public void personSignIn(@RequestBody LoginRequest loginRequest) {
-//        authService.authenticateUser(loginRequest);
-//    }
 
     @GetMapping("/list")                    // получение списка всех пользователей
     @ResponseStatus(HttpStatus.OK)
