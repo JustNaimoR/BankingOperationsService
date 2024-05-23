@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Optional<String> opt = getTokenFromRequest(request);
 
-        //todo все ли верно для проверки пришедшего токена - access и refresh?
         if (opt.isPresent() && jwtService.isAuthTokenValid(opt.get())) {
             BankingOperationsServiceApplication.logger.info("Authentication token is valid. authorization...");
 

@@ -21,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//todo
-// - BigDecimal вместо double
-// - пересмотреть механику (на более 207% в отдельном потоке) и 207% от начального депозита (?)
 
 @RestController
 @RequestMapping("/user")
@@ -90,7 +87,6 @@ public class PersonController {
 
 
 
-    // todo норм ли контроллер или стоит сделать получше
     @PutMapping("/update/{id}/phone")           // обновление телефона человека (1 значение в теле запроса)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updatePhoneNumber(@PathVariable int id, @RequestBody String phoneNumber) {

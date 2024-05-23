@@ -32,12 +32,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * - проверка что пользователь запрашивает именно перевод со своего аккаунта, а не чужого
- * V - отправляется положительное значение для перевода
- * V - оба пользователя существуют
- * V - хватает денег для перевода
- * V - перевод себе же
- * V - удачный перевод
+ * test0 - валидная передача средств
+ * test1 - один или два пользователя отсутствуют в системе
+ * test2 - перевести негативное количество единиц
+ * test3 - недостаточно средств для перевода
+ * test4 - снятие и перевод средств на один и тот же аккаунт
+ * test5 - попытка перевести средства чужого пользователя
  */
 
 @DisplayName("Units transfer tests")
@@ -50,8 +50,6 @@ public class BankAccountServiceTests {
 
     @MockBean
     private BankAccountRepository accountRepository;
-    @MockBean
-    private UserDetailsServiceImpl userDetailsService;
     @MockBean
     private PersonService personService;
 

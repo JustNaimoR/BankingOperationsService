@@ -55,8 +55,6 @@ public class PersonService {
     }
 
     public void updatePhoneNumber(int id, String phoneNumber) {
-        //todo сделать валидацию по другому? как убрать все эти if
-        // если не нашли по id то выкидывать ошибку но с указанием какой id?
         if (phoneNumber != null && personRepository.findByPhoneNumber(phoneNumber).isPresent())
             throw new ValidationException("Phone number already exists");
         if (phoneNumber != null && phoneNumber.length() != 11)

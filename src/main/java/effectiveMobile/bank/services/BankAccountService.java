@@ -105,6 +105,9 @@ public class BankAccountService {
             if (new_value.compareTo(max_value) < 0) {
                 account.setAmount(new_value);
                 added.getAndIncrement();
+            } else if (!account.getAmount().equals(max_value)) {
+                account.setAmount(max_value);
+                added.getAndIncrement();
             }
         });
 
