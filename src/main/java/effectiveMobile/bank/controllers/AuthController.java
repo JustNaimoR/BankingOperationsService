@@ -118,17 +118,14 @@ public class AuthController {
 
 
 
-    @PostMapping("/reg")                        // Регистрация новых пользователей
+    @PostMapping("/user/reg")                        // Регистрация новых пользователей
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(
             description = "Регистрация пользователя и его банковского аккаунта",
             summary = "Регистрирует пользователя и возвращает токены доступа и обновления",
-            parameters = @Parameter(
-                    name = "regDto", description = "логин-пароль пользователя", required = true
-            ),
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "пользователь зарегистрирован",
+                            responseCode = "201", description = "пользователь зарегистрирован",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtResponse.class))
                     ),
                     @ApiResponse(
@@ -149,7 +146,7 @@ public class AuthController {
 
 
 
-    @GetMapping("/list")                    // получение списка всех пользователей
+    @GetMapping("/user/list")                    // получение списка всех пользователей
     @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "список зарегистрированных пользователей",

@@ -22,7 +22,7 @@ public class PersonListItemDto {
     private String fullname;
     @Schema(example = "mail@mail.com")
     private String email;
-    @Schema(example = "year-month-dayT00:00:00")
+    @Schema(example = "year.month.dayT00:00:00")
     private LocalDateTime birthday;
     @Schema(example = "79045934392")
     private String phoneNumber;

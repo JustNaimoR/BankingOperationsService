@@ -2,9 +2,6 @@ package effectiveMobile.bank.controllers;
 
 import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.exceptions.dto.ExceptionDto;
-import effectiveMobile.bank.security.payload.JwtResponse;
-import effectiveMobile.bank.security.payload.LoginRequest;
-import effectiveMobile.bank.security.service.AuthService;
 import effectiveMobile.bank.services.BankAccountService;
 import effectiveMobile.bank.services.PersonService;
 import effectiveMobile.bank.util.PersonRegDtoValidator;
@@ -27,15 +24,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//todo - регистрация еще с некоторыми полями, которые мы не можем настроить потом
-//     - admin token для возможности получить доступ в любую точку приложения
-//     - проверка всех точек в openapi
-//     - README файл на гите (c кодом базы данных)
-
 @RestController
 @RequestMapping("/user")
 @AllArgsConstructor
-@Tag(name = "Person controller", description = "Контроллер для обработки основных запросов пользователя")
+@Tag(
+        name = "Person controller", description = "Контроллер для обработки основных запросов пользователя"
+)
 @SecurityRequirement(name = "bearerAuth")
 public class PersonController {
     private PersonService personService;
@@ -47,7 +41,7 @@ public class PersonController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "список людей с датой рождения после переданной",
-            parameters = @Parameter(name = "birthday", required = true, example = "31-12-2000"),
+            parameters = @Parameter(name = "birthday", required = true, example = "31.12.2000"),
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "запрос выполнен успешно",
@@ -65,7 +59,7 @@ public class PersonController {
     @ResponseStatus(HttpStatus.FOUND)
     @Operation(
             summary = "поиск человека по номеру телефона",
-            parameters = @Parameter(name = "phoneNumber", required = true, example = "79111234532"),
+            parameters = @Parameter(name = "phoneNumber", required = true, example = "01234567890"),
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "человек найден",
@@ -88,7 +82,7 @@ public class PersonController {
     @Operation(
             summary = "поиск человека по like имени",
             parameters = @Parameter(
-                    name = "fullname", required = true, example = "Leshchinskiy"
+                    name = "fullname", required = true, example = "Leschinsky"
             ),
             responses = {
                     @ApiResponse(
@@ -116,7 +110,7 @@ public class PersonController {
             ),
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "человек найден",
+                            responseCode = "302", description = "человек найден",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PersonListItemDto.class))
                     ),
                     @ApiResponse(
@@ -134,12 +128,9 @@ public class PersonController {
 
 
     @PutMapping("/update/{id}/phone")           // обновление телефона человека (1 значение в теле запроса)
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "обновление телефона человека через его id",
-            parameters = @Parameter(
-                    name = "phoneNumber", required = true, example = "79111234567"
-            ),
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "значение телефона обновлено",
@@ -163,12 +154,9 @@ public class PersonController {
     }
 
     @PutMapping("/update/{id}/email")           // обновление email у человека (в теле запроса 1 значение)
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "обновление email человека через его id",
-            parameters = @Parameter(
-                    name = "email", required = true, example = "mail@mail.com"
-            ),
             responses = {
                     @ApiResponse(
                             responseCode = "200", description = "значение email обновлено",

@@ -37,8 +37,6 @@ public class JwtService {
     @Value("${bankingOperationsService.jwt.REFRESH_EXPIRATION_MS}")             // 1 day
     private long REFRESH_EXPIRATION;
 
-
-
     public String generateAccessToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails, SECRET_ACCESS_KEY, ACCESS_EXPIRATION);
     }
