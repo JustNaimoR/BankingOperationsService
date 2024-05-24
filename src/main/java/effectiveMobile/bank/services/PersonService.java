@@ -31,6 +31,7 @@ public class PersonService {
     public List<PersonListItemDto> getPeople() {
         return personRepository.findAll().stream().map(person ->
                 PersonListItemDto.builder()
+                        .id(person.getId())
                         .login(person.getLogin())
                         .fullname(person.getFullname())
                         .email(person.getEmail())

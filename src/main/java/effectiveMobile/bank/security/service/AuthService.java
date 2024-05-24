@@ -1,6 +1,7 @@
 package effectiveMobile.bank.security.service;
 
 import effectiveMobile.bank.BankingOperationsServiceApplication;
+import effectiveMobile.bank.exceptions.ValidationException;
 import effectiveMobile.bank.security.entity.UserDetailsImpl;
 import effectiveMobile.bank.security.payload.JwtResponse;
 import effectiveMobile.bank.security.payload.LoginRequest;
@@ -63,7 +64,8 @@ public class AuthService {
         } else {
             BankingOperationsServiceApplication.logger.warn("Refresh-token is invalid");
 
-            return new JwtResponse(null, null);
+            throw new ValidationException("Refresh-token is invalid");
+//            return new JwtResponse(null, null);
         }
     }
 

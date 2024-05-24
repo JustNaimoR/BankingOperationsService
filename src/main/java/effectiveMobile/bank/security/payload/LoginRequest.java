@@ -2,6 +2,7 @@ package effectiveMobile.bank.security.payload;
 
 import effectiveMobile.bank.entities.Person;
 import effectiveMobile.bank.util.dto.PersonRegDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,9 +21,14 @@ public class LoginRequest {
     }
 
     @NotBlank
+    @Schema(example = "login")
     private String login;
+
     @NotBlank
+    @Schema(example = "password")
     private String password;
+
+
 
     @Override
     public String toString() {
