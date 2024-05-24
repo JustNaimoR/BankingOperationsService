@@ -2,7 +2,7 @@
 # Тестовое задание от компании Effective Mobile на позицию Java Developer
 
 Замечания:
-- продолжительность access_token в application.properties была увеличена для удобства тестирования (изначально время действия access token - 1 минута)
+- продолжительность access_token в application.properties была увеличена для удобства тестирования (изначально время действия access token - 1 минута, 6000 ms)
 
 ## Текст задания
 
