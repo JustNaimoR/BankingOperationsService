@@ -4,6 +4,7 @@
 Замечания:
 - продолжительность access_token в application.properties была увеличена для удобства тестирования (изначально время действия access token - 1 минута, 60000 ms)
 - код используемой базы данных в приложении ниже в README файле
+- тестирование трансфера денег выполнено - лежит в соответствующей папке src.test.java.effectiveMobile.bank.services.BankAccountServiceTests
 
 ## Текст задания
 
