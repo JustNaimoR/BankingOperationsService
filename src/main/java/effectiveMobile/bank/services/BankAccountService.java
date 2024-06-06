@@ -3,11 +3,9 @@ package effectiveMobile.bank.services;
 import effectiveMobile.bank.BankingOperationsServiceApplication;
 import effectiveMobile.bank.entities.BankAccount;
 import effectiveMobile.bank.entities.Person;
-import effectiveMobile.bank.exceptions.BankAccountNotFoundException;
-import effectiveMobile.bank.exceptions.IllegalActionException;
-import effectiveMobile.bank.exceptions.NotEnoughUnitsException;
-import effectiveMobile.bank.exceptions.ValidationException;
+import effectiveMobile.bank.exceptions.*;
 import effectiveMobile.bank.repositories.BankAccountRepository;
+import effectiveMobile.bank.repositories.PersonRepository;
 import effectiveMobile.bank.security.JwtAuthenticationFilter;
 import effectiveMobile.bank.security.service.AuthService;
 import effectiveMobile.bank.util.dto.UnitTransferDto;
@@ -26,12 +24,12 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Transactional
 public class BankAccountService {
     private final AuthService authService;
     private final BankAccountRepository bankAccountRepository;
-    private PersonService personService;
+    private PersonRepository personRepository;
 
 
     public void createAccount(Person person, BigDecimal amount) {
@@ -60,7 +58,7 @@ public class BankAccountService {
     public void transferMoney(int fromId, UnitTransferDto transferDto) {
         String curLogin = authService.getCurAuthenticatedUser().getName();
 
-        if (!personService.findById(fromId).getLogin().equals(curLogin))
+        if (!personRepository.findById(fromId).orElseThrow(PersonNotFoundException::new).getLogin().equals(curLogin))
             throw new IllegalActionException("The currently authenticated user cannot send units from someone else's account");
         if (fromId == transferDto.getToId())
             throw new ValidationException("You can't transfer your own money to yourself");
@@ -112,12 +110,5 @@ public class BankAccountService {
         });
 
         BankingOperationsServiceApplication.logger.info("Adding is complete. {} bank accounts are updated", added.get());
-    }
-
-
-    @Autowired
-    public void setJwtAuthenticationFilter(@Lazy PersonService personService) {
-        // Отдельный сеттер для inject, тк без него произойдет circular dependency
-        this.personService = personService;
     }
 }
