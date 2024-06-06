@@ -1,6 +1,6 @@
 /.idea
 /target
 
-demo.iml
-mvnw.cmd
-mvnw
+/demo.iml
+/mvnw.cmd
+/mvnw
