@@ -11,9 +11,6 @@ import effectiveMobile.bank.security.service.AuthService;
 import effectiveMobile.bank.util.dto.UnitTransferDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -86,10 +83,10 @@ public class BankAccountService {
     }
 
 
-
     public static final BigDecimal ONE_HUNDRED = new BigDecimal(100);
+    public static final long ONE_MINUTE_MS = 60000L;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(initialDelay = ONE_MINUTE_MS, fixedDelay = ONE_MINUTE_MS)
     public void updatePercent() {
         BankingOperationsServiceApplication.logger.info("Adding 5% to users...");
 
