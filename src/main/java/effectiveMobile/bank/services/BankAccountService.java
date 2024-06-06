@@ -108,4 +108,5 @@ public class BankAccountService {
 
         BankingOperationsServiceApplication.logger.info("Adding is complete. {} bank accounts are updated", added.get());
     }
+
 }
